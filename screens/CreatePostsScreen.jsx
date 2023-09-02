@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { Camera } from 'expo-camera';
 import {
   StyleSheet,
   TextInput,
@@ -13,11 +15,122 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import {
+  MaterialIcons,
+  Feather,
+  AntDesign,
+  Ionicons,
+  SimpleLineIcons,
+} from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
+import * as MediaLibrary from 'expo-media-library';
+import * as ImagePicker from 'expo-image-picker';
 
 const CreatePostsScreen = () => {
+  const navigation = useNavigation();
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [convertedCoordinate, setConvertedCoordinate] = useState(null);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [namePost, setNamePost] = useState('');
+  const [location, setLocation] = useState(null);
+  const [isDisabledPublishBtn, setIsDisabledPublishBtn] = useState(false);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
+      await Location.requestForegroundPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  useEffect(() => {
+    const disabled =
+      capturedPhoto !== null &&
+      namePost !== '' &&
+      convertedCoordinate !== null &&
+      location !== null
+        ? false
+        : true;
+    setIsDisabledPublishBtn(disabled);
+  }, [capturedPhoto, namePost, convertedCoordinate, location]);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const openCamera = async () => {
+    const result = await ImagePicker.launchCameraAsync();
+
+    if (!result.canceled && result.assets.length > 0) {
+      await MediaLibrary.createAssetAsync(result.assets[0].uri);
+      setCapturedPhoto(result.assets[0].uri);
+
+      const { coords } = await Location.getCurrentPositionAsync();
+      setLocation(coords);
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+      console.log(address);
+
+      const { region, country } = address[0];
+      setConvertedCoordinate({ region, country });
+      setType(
+        type === Camera.Constants.Type.back
+          ? Camera.Constants.Type.front
+          : Camera.Constants.Type.back
+      );
+    }
+  };
+
+  const openGallery = async () => {
+    const galleryResult = await ImagePicker.launchImageLibraryAsync();
+
+    if (!galleryResult.canceled && galleryResult.assets.length > 0) {
+      setCapturedPhoto(galleryResult.assets[0].uri);
+
+      const { coords } = await Location.getCurrentPositionAsync();
+      setLocation(coords);
+      const address = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+      const { region, country } = address[0];
+      setConvertedCoordinate({ region, country });
+    }
+  };
+
+  const publishPhoto = () => {
+    async () => {
+      if (cameraRef) {
+        const { uri } = await cameraRef.takePictureAsync();
+        await MediaLibrary.createAssetAsync(uri);
+      }
+    };
+
+    if (location) {
+      console.log({
+        capturedPhoto,
+        namePost,
+        location,
+        convertedCoordinate,
+      });
+      setCapturedPhoto(null);
+      setNamePost('');
+      setLocation(null);
+      setConvertedCoordinate(null);
+      navigation.navigate('Home', { screen: 'Post' });
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -31,11 +144,25 @@ const CreatePostsScreen = () => {
           <View>
             <View style={styles.photoWrapper}>
               <View style={styles.photoContent}>
-                <Image source={require('../assets/images/сontent-photo.png')} />
+                <Pressable style={styles.cameraIcon} onPress={openCamera}>
+                  <MaterialIcons name="camera-alt" size={24} color="#BDBDBD" />
+                </Pressable>
               </View>
-              <Image />
+              {capturedPhoto ? (
+                <Image
+                  style={styles.previewImage}
+                  source={{ uri: capturedPhoto }}
+                />
+              ) : (
+                <Camera style={styles.camera} type={type} ref={setCameraRef} />
+              )}
             </View>
-            <Text style={styles.text}>Завантажте фото</Text>
+
+            <Pressable onPress={openGallery}>
+              <Text style={styles.text}>
+                {capturedPhoto ? 'Редагувати фото' : 'Завантажте фото'}
+              </Text>
+            </Pressable>
             <View>
               <TextInput
                 style={[
@@ -43,6 +170,8 @@ const CreatePostsScreen = () => {
                   { height: 50, fontFamily: 'Roboto-Medium' },
                 ]}
                 placeholder="Назва..."
+                value={namePost.trimStart()}
+                onChangeText={setNamePost}
                 onFocus={() => setIsOpenKeyboard(true)}
                 onBlur={() => setIsOpenKeyboard(false)}
               />
@@ -60,19 +189,43 @@ const CreatePostsScreen = () => {
                     },
                   ]}
                   placeholder="Місцевість..."
+                  value={
+                    convertedCoordinate
+                      ? `${convertedCoordinate.region}, ${convertedCoordinate.country}`
+                      : null
+                  }
                   onFocus={() => setIsOpenKeyboard(true)}
                   onBlur={() => setIsOpenKeyboard(false)}
                 />
               </View>
             </View>
             <Pressable
-              style={styles.button}
-              onPress={() => {
-                // Alert.alert("Credentials Login", ` ${email} + ${password}`),
-                navigation.navigate('Home');
-              }}
+              style={
+                isDisabledPublishBtn
+                  ? {
+                      ...styles.button,
+                      backgroundColor: '#F6F6F6',
+                      color: '#BDBDBD',
+                    }
+                  : { ...styles.button, backgroundColor: '#FF6C00' }
+              }
+              disabled={isDisabledPublishBtn}
+              onPress={publishPhoto}
             >
-              <Text style={styles.textBtn}>Опублікувати</Text>
+              <Text
+                style={
+                  isDisabledPublishBtn
+                    ? {
+                        ...styles.textBtn,
+                        color: '#BDBDBD',
+                      }
+                    : { ...styles.textBtn, color: '#FFFFFF' }
+                }
+              >
+                {location || !capturedPhoto
+                  ? 'Опублікувати'
+                  : 'Завантаження...'}
+              </Text>
             </Pressable>
           </View>
           <View
@@ -84,6 +237,9 @@ const CreatePostsScreen = () => {
             <Pressable
               style={styles.buttonDelete}
               onPress={() => {
+                setCapturedPhoto(null);
+                setNamePost('');
+                setConvertedCoordinate(null);
                 Alert.alert('Deleted');
               }}
             >
@@ -125,6 +281,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  cameraIcon: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 60,
+    backgroundColor: '#FFFFFF4D',
+  },
   location: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,7 +320,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 32,
     backgroundColor: '#F6F6F6',
-    color: '#BDBDBD',
+    // color: '#BDBDBD',
     justifyContent: 'center',
     borderRadius: 100,
   },
@@ -166,7 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     fontFamily: 'Roboto-Regular',
     lineHeight: 19,
-    color: '#BDBDBD',
+    // color: '#BDBDBD',
   },
   buttonDelete: {
     justifyContent: 'center',
