@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { Button } from 'react-native';
+
 import React from 'react';
 import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,6 +9,8 @@ import Login from './screens/LoginScreen.jsx';
 import Post from './screens/PostsScreen.jsx';
 import Home from './screens/Home.jsx';
 import Comments from './screens/CommentsScreen.jsx';
+import Map from './screens/MapScreen.jsx';
+
 import { Feather } from '@expo/vector-icons';
 
 const MainStack = createStackNavigator(); // вказує на групу навігаторів
@@ -72,6 +74,17 @@ export default function App() {
           component={Comments}
           options={{
             title: 'Коментарі',
+            headerShown: true,
+            headerStyle: {
+              borderBottomWidth: 1,
+            },
+          }}
+        />
+        <MainStack.Screen
+          name="Map"
+          component={Map}
+          options={{
+            title: 'Мапа',
             headerShown: true,
             headerStyle: {
               borderBottomWidth: 1,
