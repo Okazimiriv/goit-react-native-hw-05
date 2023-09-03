@@ -11,7 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Comments from './CommentsScreen.jsx';
+
 import Icon from '@expo/vector-icons/Feather';
 import photo1 from '../assets/images/post-1.png';
 import photo2 from '../assets/images/post-2.png';

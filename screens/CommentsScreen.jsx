@@ -4,14 +4,9 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   Keyboard,
-  ScrollView,
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
-  Button,
-  Alert,
-  Pressable,
   TextInput,
   Image,
 } from 'react-native';
@@ -24,7 +19,7 @@ const Comments = ({ route: { params } }) => {
   const navigation = useNavigation();
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
   const { img } = params;
-  console.log(params);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
@@ -37,8 +32,7 @@ const Comments = ({ route: { params } }) => {
           style={[
             styles.container,
             {
-              // paddingBottom: isOpenKeyboard ? 100 : 16,
-              justifyContent: 'space-between',
+              paddingBottom: isOpenKeyboard ? 100 : 16,
             },
           ]}
         >
@@ -68,7 +62,7 @@ const Comments = ({ route: { params } }) => {
                 </Text>
               </View>
             </View>
-            {/* <View style={[styles.wrapperComent]}>
+            <View style={[styles.wrapperComent]}>
               <Image source={require('../assets/icons/ellipse.png')} />
               <View style={styles.boxTitle}>
                 <Text style={styles.title}>
@@ -76,21 +70,20 @@ const Comments = ({ route: { params } }) => {
                 </Text>
                 <Text style={styles.titleData}>"09 червня, 2020 | 09:20"</Text>
               </View>
-            </View> */}
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <View>
-              <TextInput
-                onFocus={() => setIsOpenKeyboard(true)}
-                onBlur={() => setIsOpenKeyboard(false)}
-                style={styles.input}
-                placeholder="Коментувати..."
-              />
-              <TouchableOpacity style={styles.btnUp}>
-                <AntDesign name="arrowup" size={24} color="white" />
-              </TouchableOpacity>
             </View>
+          </View>
+          <View style={{ flex: 1 }}></View>
+
+          <View>
+            <TextInput
+              onFocus={() => setIsOpenKeyboard(true)}
+              onBlur={() => setIsOpenKeyboard(false)}
+              style={styles.input}
+              placeholder="Коментувати..."
+            />
+            <TouchableOpacity style={styles.btnUp}>
+              <AntDesign name="arrowup" size={24} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -100,18 +93,16 @@ const Comments = ({ route: { params } }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: '#FFFFFF',
     height: '100%',
     paddingRight: 16,
     paddingLeft: 16,
-    // justifyContent: 'space-between',
+    paddingTop: 32,
+    justifyContent: 'flex-end',
   },
   wrapper: {
-    flexDirection: 'column',
     marginTop: 32,
-    // paddingLeft: 16,
-    alignItems: 'center',
   },
   wrapperComent: {
     flexDirection: 'row',
@@ -157,6 +148,7 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 8,
     marginBottom: 32,
+    paddingTop: 32,
   },
   btnUp: {
     position: 'absolute',

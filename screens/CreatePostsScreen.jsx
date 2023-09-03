@@ -3,7 +3,6 @@ import { Camera } from 'expo-camera';
 import {
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   View,
   Text,
   Image,
@@ -11,17 +10,10 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Pressable,
-  SafeAreaView,
   Platform,
   Alert,
 } from 'react-native';
-import {
-  MaterialIcons,
-  Feather,
-  AntDesign,
-  Ionicons,
-  SimpleLineIcons,
-} from '@expo/vector-icons';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
@@ -80,7 +72,7 @@ const CreatePostsScreen = () => {
         latitude: coords.latitude,
         longitude: coords.longitude,
       });
-      console.log(address);
+      // console.log(address);
 
       const { region, country } = address[0];
       setConvertedCoordinate({ region, country });
