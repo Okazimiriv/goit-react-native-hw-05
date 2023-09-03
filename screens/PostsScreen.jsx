@@ -73,7 +73,9 @@ const Post = () => {
             <View key={photo.id} style={styles.containerPhotoItem}>
               <Pressable
                 style={styles.postStyle}
-                onPress={() => navigation.navigate('Comments')}
+                onPress={() =>
+                  navigation.navigate('Comments', { img: photo.img })
+                }
               >
                 <Image source={photo.img} style={{ width: 343, height: 240 }} />
               </Pressable>

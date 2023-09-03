@@ -20,10 +20,11 @@ import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
 import { useState } from 'react';
 
-const Comments = () => {
+const Comments = ({ route: { params } }) => {
   const navigation = useNavigation();
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
-
+  const { img } = params;
+  console.log(params);
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
@@ -42,11 +43,7 @@ const Comments = () => {
           ]}
         >
           <View style={styles.wrapper}>
-            <Image
-              style={styles.image}
-              resizeMode={'cover'}
-              source={require('../assets/images/post-2.png')}
-            />
+            <Image style={styles.image} resizeMode={'cover'} source={img} />
 
             <View style={styles.wrapperComent}>
               <Image source={require('../assets/icons/ellipse.png')} />
